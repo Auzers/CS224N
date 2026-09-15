@@ -1,0 +1,58 @@
+\titledquestion{机器学习 \& 神经网络}[8] 
+\begin{parts}
+
+    
+    \part[4] Adam 优化器\newline
+        回想标准随机梯度下降（SGD）的更新规则：
+        \alns{
+            	\btheta_{t+1} &\gets \btheta_t - \alpha \nabla_{\btheta_t} J_{\text{minibatch}}(\btheta_t)
+        }
+        其中 $t+1$ 是当前时间步，$\btheta$ 是包含所有模型参数的向量（$\btheta_t$ 表示时间步 $t$ 时的模型参数，$\btheta_{t+1}$ 表示时间步 $t+1$ 时的模型参数），$J$ 是损失函数，$\nabla_{\btheta} J_{\text{minibatch}}(\btheta)$ 是损失函数对 minibatch 数据上参数的梯度，$\alpha$ 是学习率。
+        Adam 优化\footnote{Kingma and Ba, 2015, \url{https://arxiv.org/pdf/1412.6980.pdf}} 使用更复杂的更新规则，额外包含两步。\footnote{真实的 Adam 更新还包含一些次要技巧，但这里我们不考虑它们。如果你想了解更多，可以查看：\url{http://cs231n.github.io/neural-networks-3/\#sgd}}
+            
+        \begin{subparts}
+
+            \subpart[2]首先，Adam 使用了一种叫做 {\it momentum} 的技巧，通过维护 $\bm$ 来记录梯度的滚动平均：
+                \alns{
+                	\bm_{t+1} &\gets \beta_1\bm_{t} + (1 - \beta_1)\nabla_{\btheta_t} J_{\text{minibatch}}(\btheta_t) \\
+                	\btheta_{t+1} &\gets \btheta_t - \alpha \bm_{t+1}
+                }
+                其中 $\beta_1$ 是介于 0 和 1 之间的超参数（通常设为 0.9）。请用 2--4 句话简要解释（不需要严格证明，只需给出直觉）：$\bm$ 是如何让更新的波动变小的，以及这种低方差为什么可能有助于整体学习。\newline
+              
+                
+            \subpart[2] Adam 在 {\it momentum} 的基础上进一步引入了 {\it adaptive learning rates} 的思想，即维护 $\bv$，它是梯度大小的滚动平均：
+                \alns{
+                	\bm_{t+1} &\gets \beta_1\bm_{t} + (1 - \beta_1)\nabla_{\btheta_t} J_{\text{minibatch}}(\btheta_t) \\
+                	\bv_{t+1} &\gets \beta_2\bv_{t} + (1 - \beta_2) (\nabla_{\btheta_t} J_{\text{minibatch}}(\btheta_t) \odot \nabla_{\btheta_t} J_{\text{minibatch}}(\btheta_t)) \\
+                	\btheta_{t+1} &\gets \btheta_t - \alpha \bm_{t+1} / \sqrt{\bv_{t+1}}
+                }
+                其中 $\odot$ 和 $/$ 分别表示逐元素乘法和除法（因此 $\bz \odot \bz$ 表示逐元素平方），$\beta_2$ 是介于 0 和 1 之间的超参数（通常设为 0.99）。由于 Adam 会用 $\sqrt{\bv}$ 去除更新，哪些模型参数会得到更大的更新？为什么这可能有助于学习？
+                
+           
+                
+                \end{subparts}
+        
+        
+            \part[4] 
+            Dropout\footnote{Srivastava et al., 2014, \url{https://www.cs.toronto.edu/~hinton/absps/JMLRdropout.pdf}} 是一种正则化技术。在训练期间，dropout 会以概率 $p_{\text{drop}}$ 随机将隐藏层 $\bh$ 中的单元置为 0（每个 minibatch 可能丢弃不同的单元），然后再乘上一个常数 $\gamma$。我们可以写成：
+                \alns{
+                	\bh_{\text{drop}} = \gamma \bd \odot \bh
+                }
+                其中 $\bd \in \{0, 1\}^{D_h}$（$D_h$ 是 $\bh$ 的大小）
+                是一个掩码向量，其中每个元素以概率 $p_{\text{drop}}$ 取 0，并以概率 $(1 - p_{\text{drop}})$ 取 1。$\gamma$ 的选择要满足 $\bh_{\text{drop}}$ 的期望值等于 $\bh$：
+                \alns{
+                	\mathbb{E}_{p_{\text{drop}}}[\bh_\text{drop}]_i = h_i \text{\phantom{aaaa}}
+                }
+                对所有 $i \in \{1,\dots,D_h\}$ 成立。
+            \begin{subparts}
+            \subpart[2]
+                $\gamma$ 必须等于多少（用 $p_{\text{drop}}$ 表示）？简要说明理由或利用给定公式给出数学推导。
+                
+            
+          \subpart[2] 为什么训练时应使用 dropout？为什么在评估时\textbf{不}应使用 dropout？\textbf{提示：} 参考链接的 dropout 论文可能会有帮助。\newline
+          
+         
+        \end{subparts}
+
+
+\end{parts}
