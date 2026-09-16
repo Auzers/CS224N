@@ -47,6 +47,12 @@ class ParserModel(nn.Module):
         self.embed_size = embeddings.shape[1]
         self.hidden_size = hidden_size
         self.embeddings = nn.Parameter(torch.tensor(embeddings))
+        self.embed_to_hidden_weight = nn.Parameter(nn.init.xavier_uniform_(torch.empty(self.n_features * self.embed_size, self.hidden_size)))
+        self.embed_to_hidden_bias = nn.Parameter(nn.init.uniform_(torch.empty(self.hidden_size,)))
+        self.dropout = nn.Dropout(dropout_prob)
+        self.hidden_to_logits_weight = nn.Parameter(nn.init.xavier_uniform_(torch.empty(self.hidden_size, self.n_classes)))
+        self.hidden_to_logits_bias = nn.Parameter(nn.init.uniform_(torch.empty(self.n_classes)))
+        
 
         ### YOUR CODE HERE (~9-10 Lines)
         ### TODO:
@@ -85,6 +91,8 @@ class ParserModel(nn.Module):
             @return x (Tensor): tensor of embeddings for words represented in w
                                 (batch_size, n_features * embed_size)
         """
+        x = self.embeddings[w].view(-1, self.n_features * self.embed_size)
+        
 
         ### YOUR CODE HERE (~1-4 Lines)
         ### TODO:
@@ -132,6 +140,12 @@ class ParserModel(nn.Module):
         @return logits (Tensor): tensor of predictions (output after applying the layers of the network)
                                  without applying softmax (batch_size, n_classes)
         """
+        a1 = self.embedding_lookup(w) # B * n_features * embedding_size
+        a2 = a1.matmul(self.embed_to_hidden_weight) + self.embed_to_hidden_bias
+        h = F.relu(a2)
+        h = self.dropout(h)
+        logits = h.matmul(self.hidden_to_logits_weight) + self.hidden_to_logits_bias
+
         ### YOUR CODE HERE (~3-5 lines)
         ### TODO:
         ###     Complete the forward computation as described in write-up. In addition, include a dropout layer
